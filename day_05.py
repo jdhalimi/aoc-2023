@@ -171,4 +171,4 @@ def calc_file_location_range(file_name):
 
 def test_calc_file_location_range():
     """ tests calc_file_score function """
-    assert calc_file_location_range("data/05.txt") == 916
+    assert calc_file_location_range("data/05.txt") == 37806486
