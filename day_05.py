@@ -113,3 +113,62 @@ def calc_file_location(file_name):
 def test_calc_file_location():
     """ tests calc_file_score function """
     assert calc_file_location("data/05.txt") == 1181555926
+
+
+def calc_destination_range(ranges, translations):
+    """ calculates destination """
+
+    # |-------------|           |-------------|
+    #     |-----|                         |-----------|
+    # a1  b1    b2  a2          a1        b1  a2      b2
+
+    ranges = [x for x in ranges]
+    destinations = []
+    while ranges:
+        b1, i = ranges.pop(0), ranges.pop(0)
+        b2 = b1 + i
+        found = False
+        for d, a1, j in translations:
+            a2 = a1 + j
+            if a1 <= b1 < a2:
+                found = True
+                if b2 <= a2:
+                    destinations.extend([d + b1 - a1, b2 - b1])
+                else:
+                    destinations.extend([d + b1 - a1, a2 - b1])
+                    ranges = [a2, b2 - a2] + ranges
+                break
+        if not found:
+            destinations.extend([b1, b2 - b1])
+
+    return destinations
+
+
+def find_location_range(ranges, mappings):
+    """ finds location """
+    for k in ('seed-to-soil', 'soil-to-fertilizer', 'fertilizer-to-water', 'water-to-light', 'light-to-temperature',
+              'temperature-to-humidity', 'humidity-to-location'):
+        ranges = calc_destination_range(ranges, mappings[k])
+    locations = ranges[::2]
+    return min(locations)
+
+
+def test_calc_find_location_range():
+    """ tests calc_file_score function """
+    mappings = decode_map(sample)
+    ranges = mappings['seeds']
+
+    assert find_location_range(ranges, mappings) == 46
+
+
+def calc_file_location_range(file_name):
+    """ reads file and calculates score """
+    with open(file_name, 'r') as f:
+        mappings = decode_map(f.read())
+    ranges = mappings['seeds']
+    return find_location_range(ranges, mappings)
+
+
+def test_calc_file_location_range():
+    """ tests calc_file_score function """
+    assert calc_file_location_range("data/05.txt") == 916
